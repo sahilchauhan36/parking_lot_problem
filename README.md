@@ -9,3 +9,11 @@ out:
 We interact with the system via a simple set of commands which produce a specific output. Please take a look at the example below, which includes all the commands you need to support - they're self explanatory. The system should allow input in two ways. Just to clarify, the same codebase should support both modes of input - we don't want two distinct submissions.
 1) It should provide us with an interactive command prompt based shell where commands can be typed in
 2) It should accept a filename as a parameter at the command prompt and read the commands from that file
+
+## A Brief About the Project Organization 
+- PRD and Design Document
+- Library: Various Library Files required for Program Execution
+- Bin: Containing the main Program File 
+- Input: Contains the Input file 
+- Output: Contains the Output File
+- Tests: Contains various Unit and Functional Test 
