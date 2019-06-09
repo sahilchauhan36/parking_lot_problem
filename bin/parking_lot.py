@@ -4,6 +4,9 @@ import array
 
 
 class Car:
+    """
+    This Class Represents Car as a Granular Real World Entity.
+    """
     # Initiate Car Instance
     def __init__(self, reg_no, color):
         self.color = color
@@ -11,12 +14,16 @@ class Car:
 
 
 class ParkingAllocation:
-    # Intiate parking lot size.
+    """
+    The Class Represents Parking Allocation System
+    """
+    # Intiate Current Size of the Parking Slot, Available Slot
     current_size = 0
     available_slot = 1
     park_list = dict()
 
     def __init__(self, max_size):
+        # Intiate parking lot size
         self.max_size = max_size
         print ("Created a parking lot with %d slots" % max_size)
 
