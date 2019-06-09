@@ -1,25 +1,28 @@
-from library.notification_enums import notification_message as message
-import logging as log
+from library.notification_enums import NotificationMessage as message
+import sys
+import array
 
-class car():
+
+class Car:
     # Initiate Car Instance
     def __init__(self, reg_no, color):
         self.color = color
         self.reg_no = reg_no
 
 
-class parking_allocation():
+class ParkingAllocation:
     # Intiate parking lot size.
     current_size = 0
     available_slot = 1
-    park_list = list()
+    park_list = dict()
 
     def __init__(self, max_size):
         self.max_size = max_size
+        print ("Created a parking lot with %d slots" % max_size)
 
     def is_slot_number_valid(self, slot_no):
         # Is parking slot number provided valid.
-        if slot_no > self.max_size or slot_no <= 0:
+        if int(slot_no) > self.max_size or int(slot_no) <= 0:
             return False
         return True
 
@@ -30,20 +33,23 @@ class parking_allocation():
         return True
 
     def set_available_slot(self):
-        for i in range(1,self.max_size):
-            if i not in self.park_list:
+        for i in range(1,self.max_size+1):
+            if self.park_list.get(i) is None:
                 self.available_slot = i
                 return
-        self.available_slot = 0
+        self.available_slot = None
 
     def park(self, reg_no, color):
+
         # Check if Parking Lot is full
         if self.current_size >= self.max_size:
-            log.debug(message.FULL_PARKING)
+            print(message.FULL_PARKING)
+            return
 
         # Check if the Max size is zero.
-        assert self.is_parking_lot_valid(), \
-            log.debug(message.INVALID_PARKING_LOT)
+        if not self.is_parking_lot_valid():
+            print(message.INVALID_PARKING_LOT)
+            return
 
         self.allocate(reg_no, color)
 
@@ -56,9 +62,9 @@ class parking_allocation():
         :param color: Color of the Car
         :type color: str
         """
-        car_obj = car(reg_no=reg_no, color=color)
-        self.park_list[self.available_slot] = car_obj
-        log.info('Allocated slot number: %d' % self.available_slot)
+        car_obj = Car(reg_no=reg_no, color=color)
+        self.park_list.update([(self.available_slot,car_obj)])
+        print('Allocated slot number: %d' % self.available_slot)
         self.set_available_slot()
         self.current_size = self.current_size + 1
 
@@ -71,21 +77,25 @@ class parking_allocation():
         """
 
         # Check if Parking Slot Number is Valid
-        if self.is_slot_number_valid(slot_no):
-            log.info(message.INVALID_SLOT_NUMBER)
+        if not self.is_slot_number_valid(slot_no):
+            print(message.INVALID_SLOT_NUMBER)
             return
+
         # Check if Car is available on Slot Number specified
-        if slot_no not in self.park_list:
-            log.info(message.NO_CAR_FOUND)
+        if self.park_list.get(slot_no) is None:
+            print(message.NO_CAR_FOUND)
             return
+
         # Remove Car from Parking List
-        self.park_list.remove(slot_no)
+        self.park_list.pop(slot_no)
+
         # Update Current Size of Cars Parked in Parking Lot
         if self.current_size > 0:
             self.current_size = self.current_size - 1
-        log.info("Slot number %s is free" % slot_no)
-        # Set Next Available Slot
-        if slot_no < self.available_slot:
+        print("Slot number %s is free" % slot_no)
+
+        # Update Next Available Slot
+        if self.available_slot is None or slot_no < self.available_slot:
             self.available_slot = slot_no
 
     def get_car(self, slot_no):
@@ -98,19 +108,20 @@ class parking_allocation():
         # Get car by slot number.
         if self.is_slot_number_valid(slot_no):
             return self.park_list[slot_no]
-        log.debug(message.INVALID_SLOT_NUMBER)
+        print(message.INVALID_SLOT_NUMBER)
 
     def status(self):
         """
         Print Status of Parking Lot
         """
+        # Check if there are any cars in the Parking Lot
         if len(self.park_list) <= 0:
-            log.info(message.EMPTY_PARKING_LOT)
+            print(message.EMPTY_PARKING_LOT)
+            return
 
-        log.info('Slot No.\t\tRegistration No\t\tColour')
-        for car in self.park_list:
-            log.info('%s\t\t%s\t\t%s' %(self.park_list.index(car),
-                                        car.reg_no, car.color))
+        print('Slot No.\tRegistration No\t\tColour')
+        for slot_no, car in self.park_list.items():
+            print('%d\t\t%s\t\t%s' %(slot_no,car.reg_no, car.color))
 
     def get_slot_by_color(self, color):
         """
@@ -118,15 +129,17 @@ class parking_allocation():
         :param color: Name of the color
         :type color: str
         """
-        colored_cars = list()
-        for car in self.park_list:
+        car_slots = list()
+        for slot_no, car in self.park_list.items():
             if car.color == color:
-                colored_cars.append(self.park_list.index(car))
+                car_slots.append(slot_no)
+
         # Check if the number of cars are zero.
-        if len(colored_cars) <= 0:
-            log.info(message.NOT_FOUND)
+        if len(car_slots) <= 0:
+            print(message.NOT_FOUND)
             return
-        log.info(','.join(colored_cars))
+
+        print(car_slots)
 
     def get_slot_number_from_reg_no(self, reg_no):
         """
@@ -135,11 +148,11 @@ class parking_allocation():
         :param reg_no: Car registration number
         :type reg_no: str
         """
-        for car in self.park_list:
+        for slot_no, car in self.park_list.items():
             if car.reg_no == reg_no:
-                log.info(self.park_list.index(car))
+                print(slot_no)
                 return
-        log.info(message.NOT_FOUND)
+        print(message.NOT_FOUND)
 
     def get_reg_no_from_color(self, color):
         """
@@ -149,11 +162,18 @@ class parking_allocation():
         :type color: str
         """
         colored_cars = list()
-        for car in self.park_list:
+        for car in self.park_list.values():
             if car.color == color:
                 colored_cars.append(car.reg_no)
+
         # Check if the number of cars are zero.
         if len(colored_cars) <= 0:
-            log.info(message.NOT_FOUND)
+            print(message.NOT_FOUND)
             return
-        log.info(','.join(colored_cars))
+        print(','.join(colored_cars))
+
+    def exit(self):
+        """
+        To Exit from Parking Lot
+        """
+        sys.exit()
