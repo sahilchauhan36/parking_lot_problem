@@ -1,6 +1,9 @@
 # File Containing various Commands Enums
 
 class CommandEnums:
+    """
+    Various Commands to be get from the user.
+    """
     CREATE_PARKING = "create_parking_lot"
     PARK = "park"
     LEAVE = "leave"
